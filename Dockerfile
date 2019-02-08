@@ -28,6 +28,7 @@ ARG SPICE_REF=spice-html5-0.1.6
 
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+ENV UWSGI_EMBED_PLUGINS=stats_pusher_statsd
 
 COPY scripts /opt/loci/scripts
 ADD bindep.txt pydep.txt $EXTRA_BINDEP $EXTRA_PYDEP /opt/loci/
