@@ -119,4 +119,5 @@ else
     fi
 fi
 
+$(dirname $0)/collect_info.sh
 $(dirname $0)/cleanup.sh
