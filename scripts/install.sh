@@ -75,8 +75,8 @@ if [[ "${PROJECT}" == "requirements" ]]; then
     $(dirname $0)/requirements.sh
     exit 0
 else
-    # grab kubernetes-entrypoint
-    curl -sLo /usr/local/bin/kubernetes-entrypoint https://github.wdf.sap.corp/d062284/k8s-entrypoint-build/releases/download/6d8d33d/kubernetes-entrypoint && \
+    # grab kubernetes-entrypoint from the sapcc-pypi (https://dashboard.eu-de-1.cloud.sap/ccadmin/master/object-storage/containers/sapcc-pypi/)
+    curl -sLo /usr/local/bin/kubernetes-entrypoint https://objectstore-3.eu-de-1.cloud.sap/v1/AUTH_caa6209d2c38450f8266311fd0f05446/sapcc-pypi/kubernetes-entrypoint && \
     chmod +x /usr/local/bin/kubernetes-entrypoint
 fi
 
