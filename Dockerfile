@@ -1,6 +1,7 @@
+ARG MIRROR=keppel.eu-de-1.cloud.sap/ccloud-dockerhub-mirror/library
 ARG DISTRO=ubuntu
 ARG DISTRO_RELEASE=xenial
-ARG FROM=${DISTRO}:${DISTRO_RELEASE}
+ARG FROM=${MIRROR}/${DISTRO}:${DISTRO_RELEASE}
 FROM ${FROM}
 
 ENV PATH=/var/lib/openstack/bin:$PATH
