@@ -20,7 +20,10 @@ mkdir /usr/share/spice-html5
 git clone -b ${SPICE_REF} --depth 1 ${SPICE_REPO} /usr/share/spice-html5
 
 # mksproxy
-mkdir /usr/share/noVNC-mks
+wget $MKS_REPO/archive/$MKS_REF.zip -O noVNC-mks-${MKS_REF:0:8}.zip
+# Archive zip contains a dir named "$REPO-$REF", so extract to /usr/share
+# directly and then rename.
+unzip noVNC-mks-${MKS_REF:0:8}.zip -d /usr/share/
+mv noVNC-$MKS_REF /usr/share/noVNC-mks
 # TODO(jkulik): remove after Nova is rolled out with Xena
 ln -s /usr/share/noVNC-mks /usr/local/noVNC-mks
-git clone -b ${MKS_REF} --depth 1 ${MKS_REPO} /usr/share/noVNC-mks
