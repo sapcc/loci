@@ -5,21 +5,10 @@ set -ex
 distro=$(awk -F= '/^ID=/ {gsub(/\"/, "", $2); print $2}' /etc/*release)
 export distro=${DISTRO:=$distro}
 
-if [[ "${PYTHON3}" == "no" ]]; then
-    if [[ "${DISTRO_RELEASE}" == "trusty" ]]; then
-        dpkg_python_packages=("python" "python-virtualenv")
-    else
-        dpkg_python_packages=("python" "virtualenv")
-    fi
-    rpm_python_packages=("python" "python-virtualenv")
-    python3=""
-    python_version=2
-else
-    dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
-    rpm_python_packages=("python3" "python3-virtualenv")
-    python3="python3"
-    python_version=3
-fi
+dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
+rpm_python_packages=("python3" "python3-virtualenv")
+python3="python3"
+python_version=3
 
 if [[ "${EXTENSIONS}" == "no" ]] && [[ ${PROJECT} == 'nova' ]] && [[ "${DISTRO_RELEASE}" == "focal" ]]; then
     sed -i 's#deb http://ubuntu-cloud.archive.canonical.com/ubuntu/ focal-updates/xena main#deb http://ubuntu-cloud.archive.canonical.com/ubuntu/ focal-updates/yoga main#' /etc/apt/sources.list
@@ -27,6 +16,7 @@ fi
 
 case ${distro} in
     debian|ubuntu)
+        rm -f /etc/apt/apt.conf.d/docker-clean
         apt-get update
         apt-get upgrade -y
         apt-get install -y --no-install-recommends \
@@ -53,11 +43,7 @@ case ${distro} in
             ${rpm_python_packages[@]}
         ;;
     opensuse|opensuse-leap|opensuse-tumbleweed|sles)
-        if [[ "${PYTHON3}" == "no" ]]; then
-           rpm_python_packages+=("python-devel" "python-setuptools")
-        else
-           rpm_python_packages+=("python3-devel" "python3-setuptools")
-        fi
+        rpm_python_packages+=("python3-devel" "python3-setuptools")
         zypper --non-interactive --gpg-auto-import-keys refresh
         zypper --non-interactive install --no-recommends \
             ca-certificates \
@@ -80,7 +66,8 @@ if [[ "${PROJECT}" == "requirements" ]]; then
     exit 0
 fi
 
-$(dirname $0)/fetch_wheels.sh
+$(dirname $0)/fetch_wheels.py
+
 if [[ "${PROJECT}" == "infra" ]]; then
    $(dirname $0)/setup_pip.sh
     $(dirname $0)/pip_install.sh bindep ${PIP_PACKAGES}
@@ -98,17 +85,21 @@ if [[ "${PLUGIN}" == "no" ]]; then
     $(dirname $0)/pip_install.sh ${PYDEP_PACKAGES[@]}
 fi
 $(dirname $0)/clone_project.sh
-if [[ "${EXTENSIONS}" == "no" ]]; then
-    if [[ ${PROJECT} == 'nova' ]]; then
-        $(dirname $0)/install_nova_console.sh
-    fi
-    $(dirname $0)/install_packages.sh
-    $(dirname $0)/pip_install.sh /tmp/${PROJECT} ${PIP_PACKAGES}
-else
-    # install custom requirements
-    if [[ -e /tmp/${PROJECT}/custom-requirements.txt ]]; then
-        pip install --no-cache-dir --pre --no-compile -r /tmp/${PROJECT}/custom-requirements.txt -c /tmp/wheels/upper-constraints.txt --find-links /tmp/wheels/ ${PIP_ARGS}
+
+if [ ${PROJECT} = 'nova' ]; then
+    $(dirname $0)/install_nova_console.sh
+fi
+
+if [ "${EXTENSIONS}" != "no" ]; then
+    if [ -e ${PROJECT_DEST}/custom-requirements.txt ]; then
+        CUSTOM_REQUIREMENTS=" -r ${PROJECT_DEST}/custom-requirements.txt"
+    elif [ -e ${WHEELS_DEST}/custom-requirements.txt ]; then
+        CUSTOM_REQUIREMENTS=" -r ${WHEELS_DEST}/custom-requirements.txt"
     fi
 fi
+
+$(dirname $0)/install_packages.sh
+$(dirname $0)/pip_install.sh ${PROJECT_DEST} ${PIP_PACKAGES}
+
 $(dirname $0)/setup_pyroscope.py
 $(dirname $0)/cleanup.sh

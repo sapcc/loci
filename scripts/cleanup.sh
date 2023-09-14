@@ -9,7 +9,6 @@ case ${distro} in
             python3-virtualenv \
             python-virtualenv \
             virtualenv
-        rm -rf /var/lib/apt/lists/*
         ;;
     centos)
         # We should be removing 'patch' here, but that breaks
@@ -20,11 +19,7 @@ case ${distro} in
         yum clean all
         ;;
     opensuse|opensuse-leap|opensuse-tumbleweed|sles)
-        if [[ "${PYTHON3}" == "no" ]]; then
-            virtualenv_package="python-virtualenv"
-        else
-            virtualenv_package="python3-virtualenv"
-        fi
+        virtualenv_package="python3-virtualenv"
         zypper remove -y --clean-deps \
             git-core \
             patch \
@@ -42,5 +37,5 @@ esac
 # for using python-rbd which is not pip installable and is only available
 # in packaged form.
 rm -f /var/lib/openstack/lib/python*/no-global-site-packages.txt
-rm -rf /tmp/* /root/.cache /etc/machine-id
+rm -rf /tmp/* /etc/machine-id
 find /usr/ /var/ \( -name "*.pyc" -o -name "__pycache__" \) -delete
