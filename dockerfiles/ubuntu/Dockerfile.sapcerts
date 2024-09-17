@@ -1,0 +1,15 @@
+ARG DISTRO=ubuntu
+ARG DISTRO_RELEASE=xenial
+ARG FROM=${DISTRO}:${DISTRO_RELEASE}
+FROM ${FROM}
+
+# add SAP certificates
+ENV REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+COPY certificates/* /usr/local/share/ca-certificates/
+
+RUN echo 'precedence ::ffff:0:0/96  100' >> /etc/gai.conf && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends ca-certificates && \
+    update-ca-certificates && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /root/.cache
