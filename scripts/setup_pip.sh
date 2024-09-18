@@ -3,16 +3,15 @@
 set -ex
 
 
-if [[ "${PYTHON3}" == "no" ]]; then
-    TMP_VIRTUALENV="virtualenv"
-else
-    TMP_VIRTUALENV="python3 -m virtualenv --python=python3"
-fi
+TMP_VIRTUALENV="python3 -m virtualenv --python=python3"
 
-# This little dance allows us to install the latest pip and setuptools
+# This little dance allows us to install the latest pip
 # without get_pip.py or the python-pip package (in epel on centos)
-if (( $(${TMP_VIRTUALENV} --version | cut -d. -f1) >= 14 )); then
+if (( $(${TMP_VIRTUALENV} --version | grep -Po '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1) >= 14 )); then
     SETUPTOOLS="--no-setuptools"
+fi
+if (( $(${TMP_VIRTUALENV} --version | grep -Po '[0-9]+\.[0-9]+\.[0-9]+' | cut -d. -f1) >= 20 )); then
+    SETUPTOOLS="--seed pip --download"
 fi
 
 # virtualenv 16.4.0 fixed symlink handling. The interaction of the new
@@ -23,23 +22,21 @@ fi
 PIPBOOTSTRAP=/var/lib/pipbootstrap
 
 # Create the boostrap environment so we can get pip from virtualenv
-${TMP_VIRTUALENV} --extra-search-dir=file:///tmp/wheels ${SETUPTOOLS} ${PIPBOOTSTRAP}
+${TMP_VIRTUALENV} ${SETUPTOOLS} ${PIPBOOTSTRAP}
 source ${PIPBOOTSTRAP}/bin/activate
 
-# Upgrade virtualenv, version 20 breaks with missing setuptools
-pip install --upgrade ${PIP_ARGS} 'virtualenv<20'
+# Install setuptools explicitly required for virtualenv > 20 installation
+pip install --upgrade setuptools
+
+# Upgrade to the latest version of virtualenv
+pip install --upgrade ${PIP_ARGS} virtualenv==20.7.2
 
 # Forget the cached locations of python binaries
 hash -r
 
 # Create the virtualenv with the updated toolchain for openstack service
-virtualenv --extra-search-dir=file:///tmp/wheels /var/lib/openstack
+virtualenv --seed pip --download /var/lib/openstack
 
 # Deactivate the old bootstrap virtualenv and switch to the new one
 deactivate
 source /var/lib/openstack/bin/activate
-
-pip install --upgrade ${PIP_ARGS} 'pip'
-
-# Restrict setuptools, version 58 breaks for use_2to3
-pip install --upgrade ${PIP_ARGS} "setuptools${SETUPTOOLS_VERSION_REQUIREMENT}"

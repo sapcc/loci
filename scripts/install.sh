@@ -5,6 +5,11 @@ set -ex
 distro=$(awk -F= '/^ID=/ {gsub(/\"/, "", $2); print $2}' /etc/*release)
 export distro=${DISTRO:=$distro}
 
+if [[ ${distro} == "ubuntu" ]]; then
+    distro_version=$(awk -F= '/^UBUNTU_CODENAME=/ {gsub(/\"/, "", $2); print $2}' /etc/*release)
+fi
+export distro_version=${DISTRO_VERSION:=$distro_version}
+
 if [[ "${PYTHON3}" == "no" ]]; then
     if [[ "${DISTRO_RELEASE}" == "trusty" ]]; then
         dpkg_python_packages=("python" "python-virtualenv")
