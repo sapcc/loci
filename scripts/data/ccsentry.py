@@ -1,6 +1,11 @@
 import os
 import sys
 
+# this is a list of substrings to match the command name against to
+# enable sentry for specific scripts only.
+# Can be overwritten with environment variable SENTRY_SCRIPTNAMES
+
+ENABLED_FOR = ( 'neutron', 'agent' )
 
 def enable_sentry_sdk():
 
@@ -41,8 +46,30 @@ def check_for_sentry():
     use_sdk = os.getenv('SENTRY_USE_SDK')
     if not use_sdk:
         return
-    if use_sdk.lower() in ('true', 'yes', '1', 'on', 'enabled'):
-        enable_sentry_sdk()
+
+    if use_sdk.lower() not in ('true', 'yes', '1', 'on', 'enabled'):
+        return
+
+    try:
+        cmdname = sys.argv[0]
+        if not cmdname:
+            # do not run in repl
+            return
+    except KeyError:
+        return
+
+    cmdname = os.path.basename(cmdname)
+
+    checknames = ENABLED_FOR
+    override = os.getenv('SENTRY_SCRIPTNAMES')
+    if override:
+        # only if its set and not the empty string
+        checknames = override.split()
+
+    for i in checknames:
+        if i in cmdname:
+            enable_sentry_sdk()
+            return
 
 
 check_for_sentry()
