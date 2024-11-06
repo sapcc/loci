@@ -116,4 +116,5 @@ else
     fi
 fi
 $(dirname $0)/setup_pyroscope.py
+$(dirname $0)/setup_sentry_sdk.py
 $(dirname $0)/cleanup.sh
