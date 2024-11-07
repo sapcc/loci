@@ -1,11 +1,36 @@
 import os
 import sys
+"""
+  This script is placed into the site-packages directory
+  of a virtualenv or python installation to inject the sentry
+  sdk initialization into all python processes.
+  We need to initialize the sdk in a certain way to allow fine
+  grained control over what is being logged which requires a
+  manual call to the init method to change the defaults.
+  Also we need to rewrite the DSN during the migration from raven.
+  This script will be loaded as a module by an accompanying pth
+  file.
+
+  Some configuration is possible via the environment:
+
+  SENTRY_DSN       -- default environment variable sentry is using
+
+  CCSENTRY_USE_SDK -- set to true to activate this script
+
+  CCSENTRY_PNAMES  -- overwrite the default process names
+                      space separated list of substrings to match
+                      argv[0] against, overwriting the defaults.
+                      This controls for which processes/scripts
+                      the sdk will be setup.
+
+"""
+
 
 # this is a list of substrings to match the command name against to
 # enable sentry for specific scripts only.
-# Can be overwritten with environment variable SENTRY_SCRIPTNAMES
+# Can be overwritten with environment variable CCSENTRY_PNAMES
+ENABLED_FOR = ('neutron', 'agent')
 
-ENABLED_FOR = ( 'neutron', 'agent' )
 
 def enable_sentry_sdk():
 
@@ -43,7 +68,7 @@ def enable_sentry_sdk():
 
 
 def check_for_sentry():
-    use_sdk = os.getenv('SENTRY_USE_SDK')
+    use_sdk = os.getenv('CCSENTRY_USE_SDK')
     if not use_sdk:
         return
 
@@ -61,9 +86,11 @@ def check_for_sentry():
     cmdname = os.path.basename(cmdname)
 
     checknames = ENABLED_FOR
-    override = os.getenv('SENTRY_SCRIPTNAMES')
+    override = os.getenv('CCSENTRY_PNAMES')
     if override:
-        # only if its set and not the empty string
+        # only if its set and not the empty string,
+        # and empty string would be contradicting
+        # CCSENTRY_USE_SDK being set.
         checknames = override.split()
 
     for i in checknames:
