@@ -20,7 +20,7 @@ if [[ "${PYTHON3}" == "no" ]]; then
     python3=""
     python_version=2
 else
-    dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
+    dpkg_python_packages=("python3" "python3-virtualenv")
     rpm_python_packages=("python3" "python3-virtualenv")
     python3="python3"
     python_version=3
@@ -112,6 +112,7 @@ if [[ "${EXTENSIONS}" == "no" ]]; then
 else
     # install custom requirements
     if [[ -e /tmp/${PROJECT}/custom-requirements.txt ]]; then
+        sed -i '/dnspython/d' /tmp/wheels/upper-constraints.txt
         pip install --no-cache-dir --pre --no-compile -r /tmp/${PROJECT}/custom-requirements.txt -c /tmp/wheels/upper-constraints.txt --find-links /tmp/wheels/ ${PIP_ARGS}
     fi
 fi
