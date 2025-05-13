@@ -20,7 +20,7 @@ if [[ "${PYTHON3}" == "no" ]]; then
     python3=""
     python_version=2
 else
-    dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
+    dpkg_python_packages=("python3" "python3-virtualenv")
     rpm_python_packages=("python3" "python3-virtualenv")
     python3="python3"
     python_version=3
@@ -33,6 +33,9 @@ fi
 case ${distro} in
     debian|ubuntu)
         apt-get update
+        if [[ ! -z "$(apt-cache search ^python3-distutils$)" ]] && [[ "${PYTHON3}" != "no" ]]; then
+            dpkg_python_packages+=("python3-distutils")
+        fi
         apt-get upgrade -y
         apt-get install -y --no-install-recommends \
             git \
