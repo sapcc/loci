@@ -20,7 +20,11 @@ if [[ "${PYTHON3}" == "no" ]]; then
     python3=""
     python_version=2
 else
-    dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
+    if [[ "${distro_version}" == "noble" ]]; then
+        dpkg_python_packages=("python3" "python3-virtualenv" "python3-setuptools")
+    else
+        dpkg_python_packages=("python3" "python3-virtualenv" "python3-distutils")
+    fi
     rpm_python_packages=("python3" "python3-virtualenv")
     python3="python3"
     python_version=3
