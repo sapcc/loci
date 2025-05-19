@@ -28,8 +28,12 @@ source ${PIPBOOTSTRAP}/bin/activate
 # Install setuptools explicitly required for virtualenv > 20 installation
 pip install --upgrade setuptools
 
-# Upgrade to the latest version of virtualenv
-pip install --upgrade ${PIP_ARGS} virtualenv==20.7.2
+# Upgrade to the latest version of virtualenv (for old python version it has to be 20.7.2)
+if (( $(python --version | grep -Po '[0-9]+\.[0-9]+' | cut -d. -f2) >= 12 )); then
+    pip install --upgrade ${PIP_ARGS} virtualenv
+else
+    pip install --upgrade ${PIP_ARGS} virtualenv==20.7.2
+fi
 
 # Forget the cached locations of python binaries
 hash -r
