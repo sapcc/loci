@@ -39,7 +39,7 @@ fi
 hash -r
 
 # Create the virtualenv with the updated toolchain for openstack service
-virtualenv --seed pip --download /var/lib/openstack
+virtualenv ${VIRTUAL_ENV_ARGS} /var/lib/openstack
 
 # Deactivate the old bootstrap virtualenv and switch to the new one
 deactivate
