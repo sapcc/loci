@@ -118,5 +118,5 @@ else
         pip install --no-cache-dir --pre --no-compile -r /tmp/${PROJECT}/custom-requirements.txt -c /tmp/wheels/upper-constraints.txt --find-links /tmp/wheels/ ${PIP_ARGS}
     fi
 fi
-$(dirname $0)/setup_pyroscope.py
+
 $(dirname $0)/cleanup.sh
