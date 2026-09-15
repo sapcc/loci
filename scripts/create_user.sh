@@ -22,5 +22,7 @@ if [ "${PROJECT}" == "neutron" ]; then
     getent group  unbound >/dev/null && delgroup -q unbound
     adduser --uid 666 --quiet --system --group --no-create-home \
             --home /var/lib/unbound unbound
-    chown unbound:unbound /var/lib/unbound
+    if [ -d /var/lib/unbound ]; then
+        chown unbound:unbound /var/lib/unbound
+    fi
 fi
