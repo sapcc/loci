@@ -38,4 +38,5 @@ ARG MKS_REF=master
 COPY scripts /opt/loci/scripts
 ADD bindep.txt pydep.txt $EXTRA_BINDEP $EXTRA_PYDEP /opt/loci/
 
-RUN /opt/loci/scripts/install.sh
+RUN --mount=type=secret,id=netrc,dst=/root/.netrc \
+    /opt/loci/scripts/install.sh
