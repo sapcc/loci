@@ -32,6 +32,7 @@ fi
 
 case ${distro} in
     debian|ubuntu)
+        export DEBIAN_FRONTEND=noninteractive
         apt-get update
         if [[ ! -z "$(apt-cache search ^python3-distutils$)" ]] && [[ "${PYTHON3}" != "no" ]]; then
             dpkg_python_packages+=("python3-distutils")
