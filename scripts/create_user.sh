@@ -17,11 +17,12 @@ if [ "${PROJECT}" == "neutron" ]; then
     # We are deleting an existing user here first, because the failure would
     # be hard to spot - all services start, no error message, but there is
     # just nothing logged. So we would spot it only after deployment.
-    getent passwd unbound >/dev/null && deluser  -q unbound
+    getent passwd unbound >/dev/null && userdel -r unbound
     # group should be gone too, but better double check
-    getent group  unbound >/dev/null && delgroup -q unbound
-    adduser --uid 666 --quiet --system --group --no-create-home \
-            --home /var/lib/unbound unbound
+    getent group  unbound >/dev/null && groupdel unbound
+    groupadd --gid 666 --system unbound
+    useradd --uid 666 --system --no-create-home \
+            --home-dir /var/lib/unbound --gid unbound unbound
     if [ -d /var/lib/unbound ]; then
         chown unbound:unbound /var/lib/unbound
     fi
