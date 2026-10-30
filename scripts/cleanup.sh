@@ -5,6 +5,7 @@ set +e
 
 case ${distro} in
     debian|ubuntu)
+        export DEBIAN_FRONTEND=noninteractive
         apt-get purge -y --auto-remove \
             python3-virtualenv \
             python-virtualenv \
