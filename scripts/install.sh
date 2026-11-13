@@ -37,6 +37,10 @@ case ${distro} in
         if [[ ! -z "$(apt-cache search ^python3-distutils$)" ]] && [[ "${PYTHON3}" != "no" ]]; then
             dpkg_python_packages+=("python3-distutils")
         fi
+        # Hold perl before upgrading to prevent a conflict on Ubuntu 22.04 where
+        # apt-get upgrade pulls in a perl-base version that conflicts with the
+        # installed perl. Remove this if future releases no longer need it.
+        apt-mark hold perl perl-base 2>/dev/null || true
         apt-get upgrade -y
         apt-get install -y --no-install-recommends \
             git \
