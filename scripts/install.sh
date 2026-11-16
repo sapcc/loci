@@ -39,22 +39,16 @@ case ${distro} in
         fi
         # Hold perl before upgrading to prevent a conflict on Ubuntu 22.04 where
         # apt-get upgrade pulls in a perl-base version that conflicts with the
-        # installed perl. Only hold when perl is present: holding a package that
-        # is not installed also blocks installing it, which breaks the `git`
-        # dependency below on images without perl (e.g. Ubuntu Noble).
-        if dpkg -s perl >/dev/null 2>&1; then
-            apt-mark hold perl perl-base 2>/dev/null || true
-        fi
+        # installed perl. Images without perl installed (e.g. Ubuntu Noble) cannot
+        # satisfy the git dependency on perl while it is held, so drop the hold and
+        # retry before giving up.
+        dpkg_packages="git ca-certificates netbase lsb-release patch sudo curl ${dpkg_python_packages[@]}"
+        apt-mark hold perl perl-base 2>/dev/null || true
         apt-get upgrade -y
-        apt-get install -y --no-install-recommends \
-            git \
-            ca-certificates \
-            netbase \
-            lsb-release \
-            patch \
-            sudo \
-            curl \
-            ${dpkg_python_packages[@]}
+        if ! apt-get install -y --no-install-recommends ${dpkg_packages}; then
+            apt-mark unhold perl perl-base 2>/dev/null || true
+            apt-get install -y --no-install-recommends ${dpkg_packages}
+        fi
         apt-get install -y --no-install-recommends \
             libpython${python_version}.$(python${python_version} -c 'import sys;\
                                          print(sys.version_info.minor);')
