@@ -124,5 +124,6 @@ else
     fi
 fi
 
+$(dirname $0)/setup_fork_safety.py
 $(dirname $0)/collect_info.sh
 $(dirname $0)/cleanup.sh
