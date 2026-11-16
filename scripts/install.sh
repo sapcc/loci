@@ -39,8 +39,12 @@ case ${distro} in
         fi
         # Hold perl before upgrading to prevent a conflict on Ubuntu 22.04 where
         # apt-get upgrade pulls in a perl-base version that conflicts with the
-        # installed perl. Remove this if future releases no longer need it.
-        apt-mark hold perl perl-base 2>/dev/null || true
+        # installed perl. Only hold when perl is present: holding a package that
+        # is not installed also blocks installing it, which breaks the `git`
+        # dependency below on images without perl (e.g. Ubuntu Noble).
+        if dpkg -s perl >/dev/null 2>&1; then
+            apt-mark hold perl perl-base 2>/dev/null || true
+        fi
         apt-get upgrade -y
         apt-get install -y --no-install-recommends \
             git \
